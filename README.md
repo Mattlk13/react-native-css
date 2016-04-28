@@ -37,8 +37,9 @@ Flags
 - "-w" or "--watch" - watch for changes and recompile.
 - "-i" takes a input (optional)
 - "-o" takes an output path (optional)
-- "-p" or "--pretty" - pretty print the resulting compiled output
+- "-p" or "--pretty" - tty print the resulting compiled output
 - "-l" or "--literal" - generates a javascript literal object without StyleSheet.create wrapper
+- "-d" or "--allow-display" - allows to use the display property (because react native does not support it)
 
 ## Screenshot
 

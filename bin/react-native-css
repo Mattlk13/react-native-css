@@ -12,7 +12,7 @@ var prettyPrint = argv['p'] || argv['pretty'] ? true : false;
 var inputOutput = (argv['i'] && argv['o']) || argv._[0] && argv._[1];
 var literalObject = argv['l'] || argv['literal'] ? true : false;
 var css = new RNC({
-  authorizeDisplay: argv['d'] || argv['display'] ? true : false
+  authorizeDisplay: argv['d'] || argv['allow-display'] ? true : false
 });
 
 if(inputOutput) {
