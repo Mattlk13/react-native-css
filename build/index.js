@@ -18,18 +18,24 @@ var _toCamelCase = require('to-camel-case');
 
 var _toCamelCase2 = _interopRequireDefault(_toCamelCase);
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 var _utilsJs = require('./utils.js');
 
 var _utilsJs2 = _interopRequireDefault(_utilsJs);
 
 var ReactNativeCss = (function () {
-  function ReactNativeCss() {
+  function ReactNativeCss(options) {
     _classCallCheck(this, ReactNativeCss);
+
+    this.authorizeDisplay = options.authorizeDisplay;
   }
 
   _createClass(ReactNativeCss, [{
-    key: 'parse',
-    value: function parse(input, output, prettyPrint, literalObject, cb) {
+    key: 'parseDirectory',
+    value: function parseDirectory(files, output, prettyPrint, literalObject, cb) {
       if (output === undefined) output = './style.js';
       if (prettyPrint === undefined) prettyPrint = false;
 
@@ -37,6 +43,21 @@ var ReactNativeCss = (function () {
 
       if (literalObject === undefined) literalObject = false;
 
+      files.forEach(function (file) {
+        _this.parse(file, output, prettyPrint, literalObject, cb);
+      });
+    }
+  }, {
+    key: 'parse',
+    value: function parse(input, output, prettyPrint, literalObject, cb) {
+      if (output === undefined) output = './style.js';
+      if (prettyPrint === undefined) prettyPrint = false;
+
+      var _this2 = this;
+
+      if (literalObject === undefined) literalObject = false;
+
+      output += '/' + _path2['default'].basename(input, '.css') + '.js';
       if (_utilsJs2['default'].contains(input, /scss/)) {
         var _require$renderSync = require('node-sass').renderSync({
           file: input,
@@ -57,7 +78,7 @@ var ReactNativeCss = (function () {
             console.error(err);
             process.exit();
           }
-          var styleSheet = _this.toJSS(data);
+          var styleSheet = _this2.toJSS(data);
           _utilsJs2['default'].outputReactFriendlyStyle(styleSheet, output, prettyPrint, literalObject);
 
           if (cb) {
@@ -72,6 +93,10 @@ var ReactNativeCss = (function () {
       var directions = ['top', 'right', 'bottom', 'left'];
       var changeArr = ['margin', 'padding'];
       var numberize = ['width', 'height', 'font-size', 'line-height', 'border-radius', 'border-width'].concat(directions);
+      var isPxValue = function isPxValue(v) {
+        var r = new RegExp('(em|rem|\%|vh|vw|vmin|vmax|auto)');
+        return !r.test(v);
+      };
 
       directions.forEach(function (dir) {
         numberize.push('border-' + dir + '-width');
@@ -82,7 +107,7 @@ var ReactNativeCss = (function () {
 
       // CSS properties that are not supported by React Native
       // The list of supported properties is at https://facebook.github.io/react-native/docs/style.html#supported-properties
-      var unsupported = ['display'];
+      var unsupported = this.authorizeDisplay ? [] : ['display'];
 
       var _ParseCSS = (0, _cssParse2['default'])(_utilsJs2['default'].clean(stylesheetString));
 
@@ -128,10 +153,10 @@ var ReactNativeCss = (function () {
 
                   if (_utilsJs2['default'].arrayContains(property, unsupported)) return 'continue';
 
-                  if (_utilsJs2['default'].arrayContains(property, numberize)) {
-                    value = value.replace(/px|\s*/g, '');
+                  if (_utilsJs2['default'].arrayContains(property, numberize) && value !== 'auto') {
+                    value = isPxValue(value) ? value.replace(/px|\s*/g, '') : value;
 
-                    styles[(0, _toCamelCase2['default'])(property)] = parseFloat(value);
+                    styles[(0, _toCamelCase2['default'])(property)] = isPxValue(value) ? parseFloat(value) : value;
                   } else if (_utilsJs2['default'].arrayContains(property, changeArr)) {
                     baseDeclaration = {
                       type: 'description'
@@ -139,7 +164,7 @@ var ReactNativeCss = (function () {
                     values = value.replace(/px/g, '').split(/[\s,]+/);
 
                     values.forEach(function (value, index, arr) {
-                      arr[index] = parseInt(value);
+                      arr[index] = isPxValue(value) ? parseInt(value) : value;
                     });
 
                     length = values.length;
@@ -161,7 +186,7 @@ var ReactNativeCss = (function () {
                         styles[property + prop] = values[0];
                       }
 
-                      _arr3 = ['Top', 'Bottom'];
+                      _arr3 = ['Left', 'Right'];
                       for (_i3 = 0; _i3 < _arr3.length; _i3++) {
                         var prop = _arr3[_i3];
                         styles[property + prop] = values[1];

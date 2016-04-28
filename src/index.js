@@ -1,13 +1,21 @@
 import ParseCSS from 'css-parse';
 import toCamelCase from 'to-camel-case';
+import path from 'path';
 import utils from './utils.js'
 export default class ReactNativeCss {
 
-  constructor() {
+  constructor(options) {
+    this.authorizeDisplay = options.authorizeDisplay;
+  }
 
+  parseDirectory(files, output = './style.js', prettyPrint = false, literalObject = false, cb) {
+    files.forEach((file) => {
+      this.parse(file, output, prettyPrint, literalObject, cb);
+    })
   }
 
   parse(input, output = './style.js', prettyPrint = false, literalObject = false, cb) {
+    output += '/' + path.basename(input, '.css') + '.js';
     if(utils.contains(input, /scss/)) {
 
       let {css} = require('node-sass').renderSync({
@@ -42,6 +50,10 @@ export default class ReactNativeCss {
     const directions = ['top', 'right', 'bottom', 'left'];
     const changeArr = ['margin', 'padding'];
     const numberize = ['width', 'height', 'font-size', 'line-height', 'border-radius', 'border-width'].concat(directions);
+    var isPxValue = function(v) {
+      var r = new RegExp('(em|rem|\%|vh|vw|vmin|vmax|auto)');
+      return !r.test(v);
+    };
 
     directions.forEach((dir) => {
       numberize.push(`border-${dir}-width`);
@@ -52,7 +64,7 @@ export default class ReactNativeCss {
 
     // CSS properties that are not supported by React Native
     // The list of supported properties is at https://facebook.github.io/react-native/docs/style.html#supported-properties
-    const unsupported = ['display'];
+    const unsupported = this.authorizeDisplay ? [] : ['display'];
 
     let {stylesheet} = ParseCSS(utils.clean(stylesheetString));
 
@@ -76,9 +88,9 @@ export default class ReactNativeCss {
 
           if (utils.arrayContains(property, unsupported)) continue;
 
-          if (utils.arrayContains(property, numberize)) {
-            var value = value.replace(/px|\s*/g, '');
-            styles[toCamelCase(property)] = parseFloat(value);
+          if (utils.arrayContains(property, numberize) && value !== 'auto') {
+            var value = isPxValue(value) ? value.replace(/px|\s*/g, '') : value;
+            styles[toCamelCase(property)] = isPxValue(value) ? parseFloat(value) : value;
           }
 
           else if (utils.arrayContains(property, changeArr)) {
@@ -89,7 +101,7 @@ export default class ReactNativeCss {
             var values = value.replace(/px/g, '').split(/[\s,]+/);
 
             values.forEach(function (value, index, arr) {
-              arr[index] = parseInt(value);
+              arr[index] = isPxValue(value) ? parseInt(value) : value;
             });
 
             var length = values.length;
@@ -108,7 +120,7 @@ export default class ReactNativeCss {
                 styles[property + prop] = values[0];
               }
 
-              for (let prop of ['Top', 'Bottom']) {
+              for (let prop of ['Left', 'Right']) {
                 styles[property + prop] = values[1];
               }
             }

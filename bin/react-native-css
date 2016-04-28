@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var RNC = require('../build/index.js');
-var css = new RNC();
 var pkgVersion = require('../package.json').version;
 var path = require('path');
 var colors = require('colors');
@@ -12,6 +11,9 @@ var watch = argv['w'] || argv['watch'];
 var prettyPrint = argv['p'] || argv['pretty'] ? true : false;
 var inputOutput = (argv['i'] && argv['o']) || argv._[0] && argv._[1];
 var literalObject = argv['l'] || argv['literal'] ? true : false;
+var css = new RNC({
+  authorizeDisplay: argv['d'] || argv['display'] ? true : false
+});
 
 if(inputOutput) {
   var inputArgs = argv['i'] || argv._[0];
@@ -20,17 +22,34 @@ if(inputOutput) {
   var input = path.resolve(process.cwd(), inputArgs);
   var output = path.resolve(process.cwd(), outputArgs);
 
-  css.parse(input, output, prettyPrint, literalObject);
+  var filePathList = fs.readdirSync(input).reduce(function(prev, curr) {
+    if(curr.indexOf('.map') == -1) { return prev.concat([input + '/' + curr]) }
+    return prev;
+  }, [])
+  css.parseDirectory(filePathList, output, prettyPrint, literalObject);
 
   if(watch) {
     console.log('Watching for changes on:'.green, inputArgs);
     console.log('ctrl + c to exit'.red.underline);
 
     var watcher = chokidar.watch(input, {
-      ignored: /[\/\\]\./, persistent: true
-    }).on('change', function(path) {
-      console.log('File', inputArgs, 'has been changed'.green);
-      css.parse(input, output, prettyPrint, literalObject);
+      ignored: /[\/\\]\./,
+      persistent: true
+    })
+    .on('change', function(p) {
+      if (p.indexOf('.map') == -1) {
+        console.log('File', p, 'has been changed'.green);
+        css.parse(p, output, prettyPrint, literalObject);
+      }
+    })
+    .on('unlink', function(p) {
+      if (p.indexOf('.map') == -1) {
+        var filePath = output + '/' + path.basename(p, '.css') + '.js';
+        console.log('File', p, 'has been removed'.green);
+        fs.unlink(filePath, function() {
+          console.log('File', filePath, 'has been removed'.red);
+        });
+      }
     });
   }
 }else if(help ) {

@@ -42,7 +42,7 @@ var Utils = (function () {
   }, {
     key: "outputReactFriendlyStyle",
     value: function outputReactFriendlyStyle(style, outputFile, prettyPrint, literalObject) {
-      var indentation = prettyPrint ? 4 : 0;
+      var indentation = prettyPrint ? 2 : 0;
       var jsonOutput = JSON.stringify(style, null, indentation);
       var output = "module.exports = ";
       output += literalObject ? "" + jsonOutput : "require('react-native').StyleSheet.create(" + jsonOutput + ");";
