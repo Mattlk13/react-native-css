@@ -49,7 +49,7 @@ export default class ReactNativeCss {
   toJSS(stylesheetString) {
     const directions = ['top', 'right', 'bottom', 'left'];
     const changeArr = ['margin', 'padding'];
-    const numberize = ['width', 'height', 'font-size', 'line-height', 'border-radius', 'border-width'].concat(directions);
+    const numberize = ['width', 'height', 'font-size', 'border-radius', 'border-width'].concat(directions);
     var isPxValue = function(v) {
       var r = new RegExp('(em|rem|\%|vh|vw|vmin|vmax|auto)');
       return !r.test(v);

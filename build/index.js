@@ -92,7 +92,7 @@ var ReactNativeCss = (function () {
     value: function toJSS(stylesheetString) {
       var directions = ['top', 'right', 'bottom', 'left'];
       var changeArr = ['margin', 'padding'];
-      var numberize = ['width', 'height', 'font-size', 'line-height', 'border-radius', 'border-width'].concat(directions);
+      var numberize = ['width', 'height', 'font-size', 'border-radius', 'border-width'].concat(directions);
       var isPxValue = function isPxValue(v) {
         var r = new RegExp('(em|rem|\%|vh|vw|vmin|vmax|auto)');
         return !r.test(v);
