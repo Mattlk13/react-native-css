@@ -11,7 +11,7 @@
   "author": "Sabeur Thabti",
   "license": "MIT",
   "dependencies": {
-    "chokidar": "^1.4.3",
+    "chokidar": "^2.0.0",
     "colors": "^1.1.2",
     "css-parse": "^2.0.0",
     "minimist": "^1.1.1",
