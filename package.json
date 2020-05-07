@@ -6,7 +6,9 @@
   "scripts": {
     "start": "babel src --out-dir build",
     "test2": "npm start && node ./test/index.test.js",
-    "test": "babel-tap test/*.test.js"
+    "test": "babel-tap test/*.test.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Sabeur Thabti",
   "license": "MIT",
@@ -18,7 +20,8 @@
     "node-sass": "^3.3.2",
     "npm-web-api": "^0.1.1",
     "request": "^2.67.0",
-    "to-camel-case": "~0.2.0"
+    "to-camel-case": "~0.2.0",
+    "snyk": "^1.319.1"
   },
   "devDependencies": {
     "babel": "^5.8.23",
@@ -45,5 +48,6 @@
   "bugs": {
     "url": "https://github.com/sabeurthabti/react-native-css/issues"
   },
-  "homepage": "https://github.com/sabeurthabti/react-native-css"
+  "homepage": "https://github.com/sabeurthabti/react-native-css",
+  "snyk": true
 }
